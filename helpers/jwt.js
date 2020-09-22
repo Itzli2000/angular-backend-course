@@ -6,7 +6,7 @@ const createJWT = (uid) => {
         const payload = {
             uid
         }
-        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3h' }, (err, token) => {
+        jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '3d' }, (err, token) => {
             if(err) {
                 console.log(err);
                 reject('Can´t create JWT');
