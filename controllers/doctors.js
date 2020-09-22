@@ -2,16 +2,16 @@ const { response } = require('express');
 const Doctor = require('../models/doctor');
 
 const getDoctors = async (req, res = response) => {
+    const doctors = await Doctor.find().populate('user', 'name').populate('hospital', 'name');
     res.json({
         ok: true,
-        msg: 'get Doctor'
+        doctors
     });
 };
 
 const createDoctor = async (req, res = response) => {
     const doctor = new Doctor({
         user: req.uid,
-        hospital: '5f6a312a5acc217f778e760c',
         ...req.body
     });
     try {
