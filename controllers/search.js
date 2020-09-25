@@ -20,7 +20,47 @@ const getSearh = async (req, res = response) => {
     });
 };
 
+const getSearhCollection = async (req, res = response) => {
+    const search = req.params.search;
+    const collection = req.params.collection;
+    const regex = new RegExp(search, 'i');
+    let results;
+    let total;
+    switch (collection) {
+        case 'doctors':
+            results = await Doctor.find({ name: regex })
+                .populate('user', 'name image')
+                .populate('hospital', 'name image');
+            total = await Doctor.countDocuments();
+            break;
+
+        case 'hospitals':
+            results = await Hospital.find({ name: regex })
+                .populate('user', 'name image');
+            total = await Hospital.countDocuments();
+            break;
+
+        case 'users':
+            results = await User.find({ name: regex });
+            total = await User.countDocuments();
+            break;
+
+        default:
+            return res.status(400).json({
+                ok: false,
+                msg: 'no collection found'
+            });
+            break;
+    }
+    res.json({
+        ok: true,
+        total,
+        results
+    });
+};
+
 
 module.exports = {
     getSearh,
+    getSearhCollection,
 }
