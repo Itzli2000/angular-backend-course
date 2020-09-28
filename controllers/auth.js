@@ -2,6 +2,7 @@ const { response } = require('express');
 const bcryptjs = require('bcryptjs');
 const User = require('../models/user');
 const { createJWT } = require('../helpers/jwt');
+const { googleVerify } = require('../helpers/googleVerify');
 
 const login = async (req, res = response) => {
     const { email, password } = req.body;
@@ -34,6 +35,40 @@ const login = async (req, res = response) => {
     }
 };
 
+const loginGoogle = async (req, res = response) => {
+    const { token } = req.body;
+    try {
+        const { email, name, picture } = await googleVerify(token);
+        const userDb = await User.findOne({ email });
+        let user;
+        if (!userDb) {
+            user = new User({
+                name,
+                email,
+                password: '@@@',
+                image: picture,
+                google: true
+            });
+        } else {
+            user = userDb;
+            user.google = true;
+        }
+        await user.save();
+        const newToken = await createJWT(user.id);
+        res.json({
+            ok: true,
+            newToken
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            ok: false,
+            msg: 'Unexpected error, talk to the administrator'
+        });
+    }
+};
+
 module.exports = {
-    login
+    login,
+    loginGoogle
 };
